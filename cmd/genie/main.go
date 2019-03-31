@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 	"text/tabwriter"
 
-	"github.com/mewmew/genie/ctype"
-
 	"github.com/llir/llvm/asm"
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
@@ -19,6 +17,7 @@ import (
 	"github.com/llir/llvm/ir/metadata"
 	"github.com/llir/llvm/ir/value"
 	"github.com/mewkiz/pkg/goutil"
+	"github.com/mewmew/genie/ctype"
 	"github.com/mewmew/genie/mdutil"
 	"github.com/mewmew/pe"
 	"github.com/pkg/errors"
@@ -279,7 +278,7 @@ func parseRetType(f *ir.Func) (ctype.Type, error) {
 		}
 		// Parse return type.
 		switch field := diSubType.Types.Fields[0].(type) {
-		case nil:
+		case *metadata.NullLit:
 			return ctype.BasicTypeVoid, nil
 		case metadata.Field:
 			return mdutil.TypeFromField(field), nil
