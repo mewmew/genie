@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"html/template"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"text/tabwriter"
+	"text/template"
 
 	"github.com/llir/llvm/asm"
 	"github.com/llir/llvm/ir"
@@ -77,7 +77,6 @@ func genie(llPath, origPath, output string) error {
 		if err != nil {
 			return errors.WithStack(err)
 		}
-		fmt.Printf("addr: 0x%08X\n", addr)
 		if err := printFunc(w, f, addr, locals, file); err != nil {
 			return errors.WithStack(err)
 		}
