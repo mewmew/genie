@@ -1,0 +1,35 @@
+{{ .RetType }} {{ .CallConv }} {{ .FuncName }}(
+{{- range $i, $v := .Params }}
+	{{- if ne $i 0 }}, {{ end }}
+	{{- .CType }} {{ .CVarName }}
+{{- end -}}
+) {
+	printf("{{ .FuncName }}\n");
+{{- range .Params }}
+	printf("   {{ .CVarName }}: {{ verb .CType }}\n", {{ .CVarName }});
+{{- end }}
+	// patch
+	uint8_t orig[] = {
+{{- range $i, $v := .Orig }}
+	{{- if ne $i 0 }}, {{ end }}
+	{{- printf "0x%02X" $v }}
+{{- end -}}
+	};
+	uint8_t *p = (uint8_t *){{ printf "0x%08X" .Addr }};
+	for (int i = 0; i < {{ .PatchSize }}; i++) {
+		p[i] = orig[i];
+	}
+	// goto addr
+	{{ .RetType }} ({{ .CallConv }} *f)(
+{{- range $i, $v := .Params }}
+	{{- if ne $i 0 }}, {{ end }}
+	{{- .CType }} {{ .CVarName }}
+{{- end -}}
+	) = (void *){{ printf "0x%08X" .Addr }};
+	{{ if .HasRet }}return {{ end -}} f(
+{{- range $i, $v := .Params }}
+	{{- if ne $i 0 }}, {{ end }}
+	{{- .CVarName }}
+{{- end -}}
+	);
+}
