@@ -35,11 +35,11 @@ func main() {
 	var (
 		// Path to original PE binary executable.
 		origPath string
-		// Output path of Go source code.
+		// Output path of C source code.
 		output string
 	)
 	flag.StringVar(&origPath, "orig", "orig.exe", "path to original PE binary executable")
-	flag.StringVar(&output, "o", "export.go", "output path of Go source code")
+	flag.StringVar(&output, "o", "", "output path of C source code (default stdout)")
 	flag.Usage = usage
 	flag.Parse()
 	llPaths := flag.Args()
@@ -61,13 +61,22 @@ func genie(llPath, origPath, output string) error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	//fd, err := os.Create(output)
-	//if err != nil {
-	//	return errors.WithStack(err)
-	//}
-	//defer fd.Close()
-	//w := fd
 	w := os.Stdout
+	if len(output) > 0 {
+		fd, err := os.Create(output)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		defer fd.Close()
+		w = fd
+	}
+	const preface = `
+#include <stdint.h>
+#include <stdio.h>
+
+#define __fastcall __attribute__((__fastcall__))
+`
+	fmt.Fprintln(w, preface[1:])
 	for _, f := range m.Funcs {
 		if len(f.Blocks) == 0 {
 			continue
