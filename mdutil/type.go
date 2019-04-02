@@ -16,6 +16,8 @@ func TypeFromField(t metadata.Field) ctype.Type {
 		return typeFromDIBasicType(t)
 	case *metadata.DIDerivedType:
 		return typeFromDIDerivedType(t)
+	case *metadata.NullLit:
+		return ctype.BasicTypeVoid
 	default:
 		panic(fmt.Errorf("support for type %T not yet implemented", t))
 	}

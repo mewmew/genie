@@ -227,6 +227,8 @@ func cCallConv(callConv enum.CallingConv) string {
 	switch callConv {
 	case enum.CallingConvNone:
 		return ""
+	case enum.CallingConvX86StdCall:
+		return "__stdcall"
 	case enum.CallingConvX86FastCall:
 		return "__fastcall"
 	default:
