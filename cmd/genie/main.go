@@ -144,10 +144,6 @@ func printFunc(w io.Writer, f *ir.Func, addr uint64, locals []mdutil.Var, file *
 	const patchSize = 5
 	orig := file.ReadData(addr, patchSize)
 	tw := tabwriter.NewWriter(w, 1, 3, 1, ' ', tabwriter.TabIndent)
-	hasRet := true
-	if rt, ok := retType.(ctype.BasicType); ok && rt == ctype.BasicTypeVoid {
-		hasRet = false
-	}
 	data := map[string]interface{}{
 		"RetType":   retType,
 		"CallConv":  callConv,
@@ -156,7 +152,13 @@ func printFunc(w io.Writer, f *ir.Func, addr uint64, locals []mdutil.Var, file *
 		"Orig":      orig,
 		"PatchSize": patchSize,
 		"Addr":      addr,
-		"HasRet":    hasRet,
+	}
+	if !isVoid(retType) {
+		retParam := mdutil.Var{
+			CVarName: "ret",
+			CType:    retType,
+		}
+		data["ReturnParam"] = retParam
 	}
 	if err := t.Execute(tw, data); err != nil {
 		return errors.WithStack(err)
@@ -165,6 +167,12 @@ func printFunc(w io.Writer, f *ir.Func, addr uint64, locals []mdutil.Var, file *
 		return errors.WithStack(err)
 	}
 	return nil
+}
+
+// isVoid reports whether the given type is a void type.
+func isVoid(t ctype.Type) bool {
+	tt, ok := t.(ctype.BasicType)
+	return ok && tt == ctype.BasicTypeVoid
 }
 
 // verbFromCType returns the format string verb corresponding to the given C
@@ -180,7 +188,7 @@ func verbFromCType(t ctype.Type) string {
 		case ctype.BasicTypeFloat, ctype.BasicTypeDouble, ctype.BasicTypeLongDouble:
 			return "%f"
 		default:
-			panic(fmt.Errorf("support for basic type %v not yet implemented", uint(t)))
+			panic(fmt.Errorf("support for basic type %v (%s) not yet implemented", uint(t), t))
 		}
 	case *ctype.PointerType:
 		if bt, ok := t.Elem.(ctype.BasicType); ok && bt == ctype.BasicTypeChar {

@@ -23,7 +23,7 @@ func (t BasicType) CString() string {
 	case BasicTypeChar:
 		return fmt.Sprintf("typedef char int8_t;")
 	default:
-		panic(fmt.Errorf("support for basic type %v not yet implemented", uint(t)))
+		panic(fmt.Errorf("support for basic type %v (%s) not yet implemented", uint(t), t))
 	}
 }
 

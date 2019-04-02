@@ -26,11 +26,15 @@
 	{{- .CType }} {{ .CVarName }}
 {{- end -}}
 	) = (void *){{ printf "0x%08X" .Addr }};
-	{{ if .HasRet }}return {{ end -}} f(
+	{{ with .ReturnParam }}{{ .CType }} {{ .CVarName }} = {{ end -}} f(
 {{- range $i, $v := .Params }}
 	{{- if ne $i 0 }}, {{ end }}
 	{{- .CVarName }}
 {{- end -}}
 	);
+	{{- with .ReturnParam }}
+	printf("   {{ .CVarName }}: {{ verb .CType }}\n", {{ .CVarName }});
+	return {{ .CVarName }};
+	{{- end }}
 }
 
