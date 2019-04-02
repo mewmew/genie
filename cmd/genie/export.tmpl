@@ -1,4 +1,4 @@
-{{ .RetType }} {{ .CallConv }} {{ .FuncName }}(
+{{ .RetType }} {{ with .CallConv }}{{ . }} {{ end -}} {{ .FuncName }}(
 {{- range $i, $v := .Params }}
 	{{- if ne $i 0 }}, {{ end }}
 	{{- .CType }} {{ .CVarName }}
@@ -33,3 +33,4 @@
 {{- end -}}
 	);
 }
+

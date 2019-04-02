@@ -74,6 +74,8 @@ func genie(llPath, origPath, output string) error {
 #include <stdint.h>
 #include <stdio.h>
 
+#include "export.h"
+
 #define __fastcall __attribute__((__fastcall__))
 `
 	fmt.Fprintln(w, preface[1:])
@@ -190,6 +192,8 @@ func verbFromCType(t ctype.Type) string {
 			return "%s"
 		}
 		return "%p"
+	case *ctype.Typedef:
+		return verbFromCType(t.Typ)
 	default:
 		panic(fmt.Errorf("support for type %T not yet implemented", t))
 	}
@@ -221,6 +225,8 @@ func findParamName(f *ir.Func, paramName string) (string, error) {
 // calling convention.
 func cCallConv(callConv enum.CallingConv) string {
 	switch callConv {
+	case enum.CallingConvNone:
+		return ""
 	case enum.CallingConvX86FastCall:
 		return "__fastcall"
 	default:
