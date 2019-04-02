@@ -71,12 +71,7 @@ func genie(llPath, origPath, output string) error {
 		w = fd
 	}
 	const preface = `
-#include <stdint.h>
-#include <stdio.h>
-
 #include "export.h"
-
-#define __fastcall __attribute__((__fastcall__))
 `
 	fmt.Fprintln(w, preface[1:])
 	for _, f := range m.Funcs {
