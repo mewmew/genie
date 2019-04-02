@@ -1,3 +1,4 @@
+{{ $root := . -}}
 {{ .RetType }} {{ with .CallConv }}{{ . }} {{ end -}} {{ .FuncName }}(
 {{- range $i, $v := .Params }}
 	{{- if ne $i 0 }}, {{ end }}
@@ -33,7 +34,7 @@
 {{- end -}}
 	);
 	{{- with .ReturnParam }}
-	printf("   {{ .CVarName }}: {{ verb .CType }}\n", {{ .CVarName }});
+	printf("   {{ .CVarName }} ({{ $root.FuncName }}): {{ verb .CType }}\n", {{ .CVarName }});
 	return {{ .CVarName }};
 	{{- end }}
 }
