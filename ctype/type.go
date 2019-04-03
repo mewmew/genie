@@ -80,6 +80,19 @@ const (
 	BasicTypeLongDouble // long double
 )
 
+// --- [ Constant type ] -------------------------------------------------------
+
+// ConstType is a C constant type.
+type ConstType struct {
+	// Underlying type.
+	Typ Type
+}
+
+// String returns the C syntax representation of the type.
+func (t *ConstType) String() string {
+	return fmt.Sprintf("const %v", t.Typ.String())
+}
+
 // --- [ Pointer type ] --------------------------------------------------------
 
 // PointerType is a C pointer type.
@@ -92,6 +105,20 @@ type PointerType struct {
 func (t *PointerType) String() string {
 	// TODO: use "Var" hack to handle spiral rule?
 	return fmt.Sprintf("%v *", t.Elem.String())
+}
+
+// --- [ Struct type ] --------------------------------------------------------
+
+// StructType is a C structure type.
+type StructType struct {
+	// Struct name (tag).
+	Name string
+	// TODO: add struct fields.
+}
+
+// String returns the C syntax representation of the type.
+func (t *StructType) String() string {
+	return t.Name
 }
 
 // --- [ Type definition ] -----------------------------------------------------
