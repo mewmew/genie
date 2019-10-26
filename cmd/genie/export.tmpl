@@ -7,7 +7,7 @@
 ) {
 	printf("{{ .FuncName }}\n");
 {{- range .Params }}
-	printf("   {{ .CVarName }}: {{ verb .CType }}\n", {{ .CVarName }});
+	printf("\t{{ .CVarName }}: {{ verb .CType }}\n", {{ .CVarName }});
 {{- end }}
 	// patch
 	uint8_t orig[] = {
@@ -16,7 +16,7 @@
 	{{- printf "0x%02X" $v }}
 {{- end -}}
 	};
-	uint8_t *p = (uint8_t *){{ printf "0x%08X" .Addr }};
+	uint8_t *p = (uint8_t *){{ printf "0x%06X" .Addr }};
 	for (int i = 0; i < {{ .PatchSize }}; i++) {
 		p[i] = orig[i];
 	}
@@ -26,7 +26,7 @@
 	{{- if ne $i 0 }}, {{ end }}
 	{{- .CType }} {{ .CVarName }}
 {{- end -}}
-	) = (void *){{ printf "0x%08X" .Addr }};
+	) = (void *){{ printf "0x%06X" .Addr }};
 	{{ with .ReturnParam }}{{ .CType }} {{ .CVarName }} = {{ end -}} f(
 {{- range $i, $v := .Params }}
 	{{- if ne $i 0 }}, {{ end }}
@@ -34,7 +34,7 @@
 {{- end -}}
 	);
 	{{- with .ReturnParam }}
-	printf("   {{ .CVarName }} ({{ $root.FuncName }}): {{ verb .CType }}\n", {{ .CVarName }});
+	printf("\t{{ .CVarName }} ({{ $root.FuncName }}): {{ verb .CType }}\n", {{ .CVarName }});
 	return {{ .CVarName }};
 	{{- end }}
 }
