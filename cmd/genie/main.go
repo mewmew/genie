@@ -191,8 +191,19 @@ func verbFromCType(t ctype.Type) string {
 			panic(fmt.Errorf("support for basic type %v (%s) not yet implemented", uint(t), t))
 		}
 	case *ctype.PointerType:
-		if bt, ok := t.Elem.(ctype.BasicType); ok && bt == ctype.BasicTypeChar {
-			return "%s"
+		switch elem := t.Elem.(type) {
+		case ctype.BasicType:
+			if elem == ctype.BasicTypeChar {
+				return "%s"
+			}
+		case *ctype.ConstType:
+			if e, ok := elem.Typ.(ctype.BasicType); ok && e == ctype.BasicTypeChar {
+				return "%s"
+			}
+		case *ctype.Typedef:
+			if e, ok := elem.Typ.(ctype.BasicType); ok && e == ctype.BasicTypeChar {
+				return "%s"
+			}
 		}
 		return "%p"
 	case *ctype.Typedef:
