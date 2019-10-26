@@ -18,6 +18,8 @@ func TypeFromField(t metadata.Field) ctype.Type {
 		return typeFromDICompositeType(t)
 	case *metadata.DIDerivedType:
 		return typeFromDIDerivedType(t)
+	case *metadata.DISubroutineType:
+		return typeFromDISubroutineType(t)
 	case *metadata.NullLit:
 		return ctype.BasicTypeVoid
 	default:
@@ -87,5 +89,21 @@ func typeFromDITypedef(t *metadata.DIDerivedType) ctype.Type {
 	return &ctype.Typedef{
 		Name: t.Name,
 		Typ:  TypeFromField(t.BaseType),
+	}
+}
+
+// typeFromDISubroutineType returns the C type corresponding to the given LLVM
+// IR metadata subroutine type.
+func typeFromDISubroutineType(t *metadata.DISubroutineType) ctype.Type {
+	// TODO: parse t.CC.
+	var paramTypes []ctype.Type
+	retType := TypeFromField(t.Types.Fields[0])
+	for _, field := range t.Types.Fields[1:] {
+		paramType := TypeFromField(field)
+		paramTypes = append(paramTypes, paramType)
+	}
+	return &ctype.FuncType{
+		RetType:    retType,
+		ParamTypes: paramTypes,
 	}
 }

@@ -2,6 +2,7 @@
 package ctype
 
 import (
+	"bytes"
 	"fmt"
 )
 
@@ -141,3 +142,42 @@ func (t *Typedef) CString() string {
 	// TODO: use "Var" hack to handle spiral rule?
 	return fmt.Sprintf("typedef %s %s;", t.Name, t.Typ)
 }
+
+// --- [ Function type ] -------------------------------------------------------
+
+// FuncType is a C function type.
+type FuncType struct {
+	// Return type.
+	RetType Type
+	// Calling convention.
+	CallConv CallingConv
+	// Parameter types.
+	ParamTypes []Type
+}
+
+// String returns the C syntax representation of the type.
+func (t *FuncType) String() string {
+	buf := &bytes.Buffer{}
+	buf.WriteString(t.RetType.String())
+	buf.WriteString(" (*)")
+	buf.WriteString("(")
+	for i, param := range t.ParamTypes {
+		if i != 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString(param.String())
+	}
+	buf.WriteString(")")
+	return buf.String()
+}
+
+//go:generate stringer -linecomment -type CallingConv
+
+// CallingConv represents a function calling convention.
+type CallingConv uint8
+
+// Calling conventions.
+const (
+	CallConvFastCall CallingConv = iota + 1 // __fastcall
+	CallConvStdCall                         // __stdcall
+)
