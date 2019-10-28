@@ -27,15 +27,15 @@
 	{{- typeIdentString .CType .CVarName }}
 {{- end -}}
 	) = (void *){{ printf "0x%06X" .Addr }};
-	{{ with .ReturnParam }}{{ .CType }} {{ .CVarName }} = {{ end -}} f_genie(
+	{{ with .ReturnParam }}{{ .CType }} {{ .CVarName }}_genie = {{ end -}} f_genie(
 {{- range $i, $v := .Params }}
 	{{- if ne $i 0 }}, {{ end }}
 	{{- .CVarName }}
 {{- end -}}
 	);
 	{{- with .ReturnParam }}
-	printf("\t{{ .CVarName }} ({{ $root.FuncName }}): {{ verb .CType }}\n", {{ .CVarName }});
-	return {{ .CVarName }};
+	printf("\t{{ .CVarName }} ({{ $root.FuncName }}): {{ verb .CType }}\n", {{ .CVarName }}_genie);
+	return {{ .CVarName }}_genie;
 	{{- end }}
 }
 
