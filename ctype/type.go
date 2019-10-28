@@ -108,6 +108,20 @@ func (t *PointerType) String() string {
 	return fmt.Sprintf("%v *", t.Elem.String())
 }
 
+// --- [ Enum type ] --------------------------------------------------------
+
+// EnumType is a C enumerate type.
+type EnumType struct {
+	// Enum name (tag).
+	Name string
+	// TODO: add Enum fields.
+}
+
+// String returns the C syntax representation of the type.
+func (t *EnumType) String() string {
+	return t.Name
+}
+
 // --- [ Struct type ] --------------------------------------------------------
 
 // StructType is a C structure type.

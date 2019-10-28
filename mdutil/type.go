@@ -37,10 +37,20 @@ func typeFromDIBasicType(t *metadata.DIBasicType) ctype.Type {
 // metadata composite type.
 func typeFromDICompositeType(t *metadata.DICompositeType) ctype.Type {
 	switch t.Tag {
+	case enum.DwarfTagEnumerationType:
+		return typeFromDIEnumType(t)
 	case enum.DwarfTagStructureType:
 		return typeFromDIStructType(t)
 	default:
 		panic(fmt.Errorf("support for tag %v not yet implemented", t.Tag))
+	}
+}
+
+// typeFromDIEnumType returns the C type corresponding to the given LLVM IR
+// metadata enumerate type.
+func typeFromDIEnumType(t *metadata.DICompositeType) ctype.Type {
+	return &ctype.EnumType{
+		Name: t.Name,
 	}
 }
 

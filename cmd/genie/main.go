@@ -115,7 +115,7 @@ func printFunc(w io.Writer, f *ir.Func, addr uint64, locals []mdutil.Var, file *
 	for _, param := range f.Params {
 		// Look for store instructions in the entry basic block, used to store
 		// function paramters in stack-allocated local variables.
-		localName, err := findParamName(f, param.Name())
+		localName, err := findParamName(f, param)
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -206,6 +206,11 @@ func verbFromCType(t ctype.Type) string {
 			}
 		}
 		return "%p"
+	case *ctype.EnumType:
+		return "%d"
+	case *ctype.StructType:
+		// TODO: add better support for struct types.
+		return "%p"
 	case *ctype.Typedef:
 		return verbFromCType(t.Typ)
 	default:
@@ -215,7 +220,13 @@ func verbFromCType(t ctype.Type) string {
 
 // findLocalVarOfParam returns the name of the stack-allocated local variable
 // (alloca) corresponding to the given function parameter.
-func findParamName(f *ir.Func, paramName string) (string, error) {
+func findParamName(f *ir.Func, param *ir.Param) (string, error) {
+	// Parameters passed by value (byval) do not have a local variable allocated.
+	for _, attr := range param.Attrs {
+		if _, ok := attr.(ir.Byval); ok {
+			return param.Name(), nil
+		}
+	}
 	// Clang allocates a local variables to store each function parameter in.
 	entry := f.Blocks[0]
 	for _, inst := range entry.Insts {
@@ -227,12 +238,12 @@ func findParamName(f *ir.Func, paramName string) (string, error) {
 		if !ok {
 			continue
 		}
-		if src.Name() == paramName {
+		if src.Name() == param.Name() {
 			dst := storeInst.Dst.(value.Named)
 			return dst.Name(), nil
 		}
 	}
-	return "", errors.Errorf("unable to locate name of stack-allocated local variable corresponding to function parameter %q in function %q", paramName, f.Name())
+	return "", errors.Errorf("unable to locate name of stack-allocated local variable corresponding to function parameter %q in function %q", param.Name(), f.Name())
 }
 
 // cCallConv returns the C calling convention corresponding to the given LLVM IR
