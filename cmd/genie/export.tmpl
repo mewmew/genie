@@ -36,6 +36,8 @@
 	{{- with .ReturnParam }}
 	printf("\t{{ .CVarName }} ({{ $root.FuncName }}): {{ verb .CType }}\n", {{ .CVarName }}_genie);
 	return {{ .CVarName }}_genie;
+	{{- else }}
+	printf("end ({{ $root.FuncName }})\n");
 	{{- end }}
 }
 
