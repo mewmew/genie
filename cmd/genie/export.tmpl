@@ -2,7 +2,7 @@
 {{ .RetType }} {{ with .CallConv }}{{ . }} {{ end -}} {{ .FuncName }}(
 {{- range $i, $v := .Params }}
 	{{- if ne $i 0 }}, {{ end }}
-	{{- .CType }} {{ .CVarName }}
+	{{- typeIdentString .CType .CVarName }}
 {{- end -}}
 ) {
 	printf("{{ .FuncName }}\n");
@@ -10,24 +10,24 @@
 	printf("\t{{ .CVarName }}: {{ verb .CType }}\n", {{ .CVarName }});
 {{- end }}
 	// patch
-	uint8_t orig[] = {
+	uint8_t orig_genie[] = {
 {{- range $i, $v := .Orig }}
 	{{- if ne $i 0 }}, {{ end }}
 	{{- printf "0x%02X" $v }}
 {{- end -}}
 	};
-	uint8_t *p = (uint8_t *){{ printf "0x%06X" .Addr }};
+	uint8_t *p_genie = (uint8_t *){{ printf "0x%06X" .Addr }};
 	for (int i = 0; i < {{ .PatchSize }}; i++) {
-		p[i] = orig[i];
+		p_genie[i] = orig_genie[i];
 	}
 	// goto addr
-	{{ .RetType }} ({{ .CallConv }} *f)(
+	{{ .RetType }} ({{ .CallConv }} *f_genie)(
 {{- range $i, $v := .Params }}
 	{{- if ne $i 0 }}, {{ end }}
-	{{- .CType }} {{ .CVarName }}
+	{{- typeIdentString .CType .CVarName }}
 {{- end -}}
 	) = (void *){{ printf "0x%06X" .Addr }};
-	{{ with .ReturnParam }}{{ .CType }} {{ .CVarName }} = {{ end -}} f(
+	{{ with .ReturnParam }}{{ .CType }} {{ .CVarName }} = {{ end -}} f_genie(
 {{- range $i, $v := .Params }}
 	{{- if ne $i 0 }}, {{ end }}
 	{{- .CVarName }}

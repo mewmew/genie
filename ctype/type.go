@@ -163,6 +163,8 @@ func (t *Typedef) CString() string {
 type FuncType struct {
 	// Return type.
 	RetType Type
+	// Callee name (used for printing type-ident pairs).
+	Callee string
 	// Calling convention.
 	CallConv CallingConv
 	// Parameter types.
@@ -173,7 +175,7 @@ type FuncType struct {
 func (t *FuncType) String() string {
 	buf := &bytes.Buffer{}
 	buf.WriteString(t.RetType.String())
-	buf.WriteString(" (*)")
+	fmt.Fprintf(buf, " (*%s)", t.Callee)
 	buf.WriteString("(")
 	for i, param := range t.ParamTypes {
 		if i != 0 {

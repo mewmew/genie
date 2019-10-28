@@ -128,7 +128,8 @@ func printFunc(w io.Writer, f *ir.Func, addr uint64, locals []mdutil.Var, file *
 
 	// Output using template.
 	funcs := template.FuncMap{
-		"verb": verbFromCType,
+		"verb":            verbFromCType,
+		"typeIdentString": typeIdentString,
 	}
 	srcDir, err := goutil.SrcDir("github.com/mewmew/genie/cmd/genie")
 	if err != nil {
@@ -173,6 +174,19 @@ func printFunc(w io.Writer, f *ir.Func, addr uint64, locals []mdutil.Var, file *
 func isVoid(t ctype.Type) bool {
 	tt, ok := t.(ctype.BasicType)
 	return ok && tt == ctype.BasicTypeVoid
+}
+
+// typeIdentString returns the C string representation of the given type and
+// identifier pair.
+func typeIdentString(t ctype.Type, varName string) string {
+	switch t := t.(type) {
+	case *ctype.PointerType:
+		if funcType, ok := t.Elem.(*ctype.FuncType); ok {
+			funcType.Callee = varName
+			return funcType.String()
+		}
+	}
+	return fmt.Sprintf("%s %s", t, varName)
 }
 
 // verbFromCType returns the format string verb corresponding to the given C
