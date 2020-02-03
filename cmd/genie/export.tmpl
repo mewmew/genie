@@ -1,4 +1,5 @@
 {{ $root := . -}}
+__attribute__((no_caller_saved_registers)) // ref: https://clang.llvm.org/docs/AttributeReference.html#no-caller-saved-registers
 {{ .RetType }} {{ with .CallConv }}{{ . }} {{ end -}} {{ .FuncName }}(
 {{- range $i, $v := .Params }}
 	{{- if ne $i 0 }}, {{ end }}
