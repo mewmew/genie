@@ -10,7 +10,8 @@ __attribute__((no_caller_saved_registers)) // ref: https://clang.llvm.org/docs/A
 {{- range .Params }}
 	printf("\t{{ .CVarName }}: {{ verb .CType }}\n", {{ .CVarName }});
 {{- end }}
-	// patch
+	// store hook and restore original asm
+	uint8_t hook_genie[{{ .PatchSize }}];
 	uint8_t orig_genie[] = {
 {{- range $i, $v := .Orig }}
 	{{- if ne $i 0 }}, {{ end }}
@@ -19,9 +20,10 @@ __attribute__((no_caller_saved_registers)) // ref: https://clang.llvm.org/docs/A
 	};
 	uint8_t *p_genie = (uint8_t *){{ printf "0x%06X" .Addr }};
 	for (int i = 0; i < {{ .PatchSize }}; i++) {
+		hook_genie[i] = p_genie[i];
 		p_genie[i] = orig_genie[i];
 	}
-	// goto addr
+	// call original function
 	{{ .RetType }} ({{ .CallConv }} *f_genie)(
 {{- range $i, $v := .Params }}
 	{{- if ne $i 0 }}, {{ end }}
@@ -34,6 +36,11 @@ __attribute__((no_caller_saved_registers)) // ref: https://clang.llvm.org/docs/A
 	{{- .CVarName }}
 {{- end -}}
 	);
+	// restore hook asm
+	for (int i = 0; i < {{ .PatchSize }}; i++) {
+		p_genie[i] = hook_genie[i];
+	}
+	// return
 	{{- with .ReturnParam }}
 	printf("\t{{ .CVarName }} ({{ $root.FuncName }}): {{ verb .CType }}\n", {{ .CVarName }}_genie);
 	return {{ .CVarName }}_genie;
