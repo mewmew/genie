@@ -30,7 +30,22 @@ func TypeFromField(t metadata.Field) ctype.Type {
 // typeFromDIBasicType returns the C type corresponding to the given LLVM IR
 // metadata derived type.
 func typeFromDIBasicType(t *metadata.DIBasicType) ctype.Type {
-	return BasicTypeFromString(t.Name)
+	name := canonBasicTypeString(t.Name)
+	return BasicTypeFromString(name)
+}
+
+// canonBasicTypeString returns the canonical basic type string.
+func canonBasicTypeString(name string) string {
+	// "the type specifiers may occur in any order, possibly intermixed with the
+	// other declaration specifiers."
+	//
+	// ref: https://stackoverflow.com/a/45159300
+	switch name {
+	case "long unsigned int":
+		return "unsigned long int"
+	default:
+		return name
+	}
 }
 
 // typeFromDICompositeType returns the C type corresponding to the given LLVM IR
