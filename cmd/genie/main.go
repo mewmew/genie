@@ -1,12 +1,12 @@
 package main
 
 import (
+	_ "embed"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"text/tabwriter"
 	"text/template"
 
@@ -16,7 +16,6 @@ import (
 	"github.com/llir/llvm/ir/enum"
 	"github.com/llir/llvm/ir/metadata"
 	"github.com/llir/llvm/ir/value"
-	"github.com/mewkiz/pkg/goutil"
 	"github.com/mewmew/genie/ctype"
 	"github.com/mewmew/genie/mdutil"
 	"github.com/mewmew/pe"
@@ -90,6 +89,9 @@ func genie(llPath, origPath, output string) error {
 	return nil
 }
 
+//go:embed export.tmpl
+var exportTmpl string
+
 // printFunc outputs the given function in Go syntax, writing to w. The content
 // of the original binary executable is used for patches (restoring the original
 // assembly instructions that were overwritten by the injected jmp instruction).
@@ -131,13 +133,8 @@ func printFunc(w io.Writer, f *ir.Func, addr uint64, locals []mdutil.Var, file *
 		"verb":            verbFromCType,
 		"typeIdentString": typeIdentString,
 	}
-	srcDir, err := goutil.SrcDir("github.com/mewmew/genie/cmd/genie")
-	if err != nil {
-		return errors.WithStack(err)
-	}
 	const tmplName = "export.tmpl"
-	tmplPath := filepath.Join(srcDir, tmplName)
-	t, err := template.New(tmplName).Funcs(funcs).ParseFiles(tmplPath)
+	t, err := template.New(tmplName).Funcs(funcs).Parse(exportTmpl)
 	if err != nil {
 		return errors.WithStack(err)
 	}
